@@ -1,0 +1,6 @@
+export enum OrderEventMsgType {
+  NEW = 'NEW',
+  CANCEL = 'CANCEL',
+  MATCHED_SUCCESS = 'MATCHED_SUCCESS',
+  UPDATE_ORDER_BOOK = 'UPDATE_ORDER_BOOK',
+}
