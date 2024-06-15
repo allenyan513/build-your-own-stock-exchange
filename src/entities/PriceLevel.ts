@@ -40,4 +40,8 @@ export default class PriceLevel {
   toString() {
     return `Price:${this.limitPrice} LeavesQuantity:${this.orders.toString()}`;
   }
+
+  reduceTotalVolume(quantity: number) {
+    this.totalVolume -= quantity;
+  }
 }

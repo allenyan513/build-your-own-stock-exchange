@@ -156,19 +156,23 @@ export class MatchEngineService {
       sequenceId: this.nextSequenceId++,
       msgType: OrderEventMsgType.UPDATE_ORDER_BOOK,
       payload: {
-        orderBook: orderBook,
+        orderBook: {
+          symbol: order.symbol,
+          sellBook: orderBook.sellBook.toArray(),
+          buyBook: orderBook.buyBook.toArray(),
+        },
       },
     });
     return result;
   }
-  handleCancel(symbol: string, orderId: number): OrderEvent[] {
+  handleCancel(symbol: string, orderId: string): OrderEvent[] {
     const result: OrderEvent[] = [];
     let orderBook = this.orderBookMap.get(symbol);
     if (!orderBook) {
       this.orderBookMap.set(symbol, new OrderBook(symbol));
       orderBook = this.orderBookMap.get(symbol);
     }
-    if (!orderBook.orderMap.has(Number(orderId))) {
+    if (!orderBook.orderMap.has(orderId)) {
       //todo
       result.push({
         sequenceId: this.nextSequenceId++,

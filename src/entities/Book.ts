@@ -42,7 +42,7 @@ export default class Book {
   removeOrderNode(order: Order) {
     const priceLevel = this.priceLevelSortedMap.get(order.price);
     priceLevel.getOrders().delete(order);
-    //todo reduce totalVolume
+    priceLevel.reduceTotalVolume(order.quantity);
     if (priceLevel.getOrders().getSize() === 0) {
       this.priceLevelSortedMap.delete(priceLevel.getLimitPrice());
     }
@@ -87,5 +87,17 @@ export default class Book {
    */
   toString() {
     return `${this.side === Side.BUY ? '---------BUY---------' : '---------SELL---------'}\n${this.priceLevelSortedMap.toString()}\n`;
+  }
+
+  /**
+   * price: totalQuantity
+   */
+  toArray() {
+    return this.priceLevelSortedMap.toArray().map((priceLevel) => {
+      return {
+        price: priceLevel.getLimitPrice(),
+        totalQuantity: priceLevel.getTotalVolume(),
+      };
+    });
   }
 }

@@ -8,12 +8,16 @@ import { OrderStatus } from '../entities/enum/OrderStatus';
 import { OrderType } from '../entities/enum/OrderType';
 import { KafkaService } from '../kafka/kafka.service';
 import { MatchEngineService } from '../match-engine/match-engine.service';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { v4 as uuidv4 } from 'uuid';
+import { CreateOrderResponseDto } from './dto/create-order-response.dto';
 
 @Injectable()
 export class OrderManagerService {
   private readonly logger = new Logger(OrderManagerService.name);
   private inboundQueue: Consumer;
   private outboundQueue: Producer;
+  private orderMap: Map<string, Order> = new Map();
 
   constructor(private kafkaService: KafkaService) {
     this.initInboundQueue()
@@ -92,7 +96,9 @@ export class OrderManagerService {
       } as OrderEvent;
     } else {
       const order = new Order(
-        0,
+        uuidv4(),
+        Date.now(),
+        1,
         1,
         Number(args[2]),
         Number(args[3]),
@@ -101,7 +107,6 @@ export class OrderManagerService {
         args[1],
         OrderStatus.NEW,
         OrderType.LIMIT,
-        1,
       );
       return {
         sequenceId: 0,
@@ -109,5 +114,74 @@ export class OrderManagerService {
         payload: order,
       } as OrderEvent;
     }
+  }
+
+  async createOrder(createOrderDto: CreateOrderDto) {
+    const order = new Order(
+      uuidv4(),
+      Date.now(),
+      1,
+      1,
+      createOrderDto.price,
+      createOrderDto.quantity,
+      0,
+      createOrderDto.side,
+      createOrderDto.symbol,
+      OrderStatus.NEW,
+      OrderType.LIMIT,
+    );
+    await this.sendOrderEvent({
+      sequenceId: 0,
+      msgType: OrderEventMsgType.NEW,
+      payload: order,
+    });
+    const createOrderResponse: CreateOrderResponseDto = {
+      id: order.orderId,
+      createdAt: order.createdAt,
+      filledQuantity: order.matchedQuantity,
+      status: order.orderStatus,
+    };
+    this.orderMap.set(order.orderId, order);
+    return createOrderResponse;
+  }
+
+  async createRandomOrder(createOrderDto: CreateOrderDto) {
+    this.logger.log('createRandomOrder', createOrderDto);
+    const order = new Order(
+      uuidv4(),
+      Date.now(),
+      1,
+      1,
+      Number(Number(Math.random() * 100 + 100).toFixed(0)),
+      Number(Number(Math.random() * 100).toFixed(0)),
+      0,
+      Math.random() > 0.5 ? Side.BUY : Side.SELL,
+      createOrderDto.symbol,
+      OrderStatus.NEW,
+      OrderType.LIMIT,
+    );
+    this.orderMap.set(order.orderId, order);
+    await this.sendOrderEvent({
+      sequenceId: 0,
+      msgType: OrderEventMsgType.NEW,
+      payload: order,
+    });
+    setTimeout(() => {
+      this.createRandomOrder(createOrderDto);
+    }, 1000);
+  }
+
+  deleteOrder(id: number) {
+    return `This action removes a #${id} order`;
+  }
+
+  getOrders() {
+    return {
+      orders: Array.from(this.orderMap.values()),
+    };
+  }
+
+  getOrder(id: string) {
+    return this.orderMap.get(id);
   }
 }

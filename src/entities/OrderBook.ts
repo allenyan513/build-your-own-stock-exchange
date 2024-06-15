@@ -9,7 +9,7 @@ export default class OrderBook {
   sellBook: Book;
   bestBid: PriceLevel;
   bestOffer: PriceLevel;
-  orderMap: Map<number, Order>;
+  orderMap: Map<string, Order>;
 
   constructor(symbol: string) {
     this.symbol = symbol;
@@ -17,7 +17,7 @@ export default class OrderBook {
     this.sellBook = new Book(Side.SELL);
     this.bestBid = new PriceLevel(0, 0);
     this.bestOffer = new PriceLevel(0, 0);
-    this.orderMap = new Map<number, Order>();
+    this.orderMap = new Map<string, Order>();
   }
 
   getBestPrice(side: Side) {

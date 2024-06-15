@@ -6,13 +6,12 @@ import { OrderEvent } from '../entities/OrderEvent';
 import { OrderEventMsgType } from '../entities/enum/OrderEventMsgType';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import OrderBook from '../entities/OrderBook';
 
 @Injectable()
 export class MarketDataService {
   private readonly logger = new Logger(MarketDataService.name);
   private inboundQueue: Consumer;
-  private orderBookMap = new Map<string, OrderBook>();
+  private orderBookMap = new Map<string, any>();
 
   constructor(
     private kafkaService: KafkaService,
@@ -86,10 +85,19 @@ export class MarketDataService {
 
   async handleUpdateOrderBook(orderEvent: OrderEvent) {
     const payload = orderEvent.payload;
-    this.logger.log(payload.orderBook);
+    const orderBook = payload.orderBook;
+    this.orderBookMap.set(orderBook.symbol, orderBook);
+    // const { symbol, sellBook, buyBook } = orderBook;
     // const orderBook = payload.orderBook as OrderBook;
     // const symbol = orderBook.symbol
     // await this.getOrderBook(level, symbol, depth);
+    //  payload: {
+    //         orderBook: {
+    //           symbol: order.symbol,
+    //           sellBook: orderBook.sellBook.toArray(),
+    //           buyBook: orderBook.buyBook.toArray(),
+    //         },
+    //       },
   }
 
   async updateCandleChart(symbol: string, currentTimestamp: Date) {
@@ -167,15 +175,20 @@ export class MarketDataService {
   }
 
   getOrderBook(level: string, symbol: string, depth: string) {
-    return Promise.resolve(undefined);
+    const orderBook = this.orderBookMap.get(symbol);
+    if (!orderBook) {
+      return {};
+    }
+    return orderBook;
   }
 
-  getCandlestick(
+  async getCandlestick(
     symbol: string,
     interval: string,
     startTime: Date,
     endTime: Date,
   ) {
+    // this.logger.log('getCandlestick', symbol, interval, startTime, endTime);
     return this.prismaService.candleSticks.findMany({
       where: {
         symbol: symbol,

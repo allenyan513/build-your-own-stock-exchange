@@ -6,7 +6,7 @@ import { OrderStatus } from '../entities/enum/OrderStatus';
 import { OrderType } from '../entities/enum/OrderType';
 import { OrderEvent } from '../entities/OrderEvent';
 import { OrderEventMsgType } from '../entities/enum/OrderEventMsgType';
-
+import { v4 as uuidv4 } from 'uuid';
 /**
  * SELL BUY CANCEL
  * @param cmd
@@ -51,6 +51,8 @@ describe('MatchEngineService', () => {
         });
       } else {
         const order = new Order(
+          uuidv4(),
+          Date.now(),
           i,
           1,
           Number(cmdList[i][2]),
@@ -60,7 +62,6 @@ describe('MatchEngineService', () => {
           cmdList[i][1],
           OrderStatus.NEW,
           OrderType.LIMIT,
-          1,
         );
         const orderEvent: OrderEvent = {
           sequenceId: i,

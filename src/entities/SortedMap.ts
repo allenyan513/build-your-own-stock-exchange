@@ -44,4 +44,8 @@ export default class SortedMap<T> {
   toString() {
     return this.keys.map((key) => this.map.get(key)).join('\n');
   }
+
+  public toArray(): T[] {
+    return this.keys.map((key) => this.map.get(key));
+  }
 }

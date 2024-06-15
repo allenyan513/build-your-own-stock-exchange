@@ -14,18 +14,18 @@ export class MarketDataController {
     return this.marketService.getOrderBook(level, symbol, depth);
   }
 
-  @Get('/order-book/candlestick/:symbol/:interval')
+  @Get('/candlestick/:symbol/:interval')
   async getCandlestick(
     @Param('symbol') symbol: string,
     @Param('interval') interval: string,
-    @Query('startTimestamp') startTimestamp: string,
-    @Query('endTimestamp') endTimestamp: string,
+    @Query('startTime') startTime: string,
+    @Query('endTime') endTime: string,
   ) {
     return this.marketService.getCandlestick(
       symbol,
       interval,
-      new Date(startTimestamp),
-      new Date(endTimestamp),
+      new Date(startTime),
+      new Date(endTime),
     );
   }
 }

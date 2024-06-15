@@ -3,8 +3,9 @@ import { Side } from './enum/Side';
 import { OrderStatus } from './enum/OrderStatus';
 
 export default class Order {
-  orderId: number;
+  orderId: string;
   productId: number;
+  userId: number;
   price: number;
   quantity: number;
   matchedQuantity: number;
@@ -12,11 +13,13 @@ export default class Order {
   symbol: string;
   orderStatus: OrderStatus;
   orderType: OrderType;
-  userId: number;
+  createdAt: number;
 
   constructor(
-    orderId: number,
+    orderId: string,
+    createdAt: number,
     productId: number,
+    userId: number,
     price: number,
     quantity: number,
     matchedQuantity: number,
@@ -24,10 +27,11 @@ export default class Order {
     symbol: string,
     orderStatus: OrderStatus,
     orderType: OrderType,
-    userId: number,
   ) {
     this.orderId = orderId;
+    this.createdAt = createdAt;
     this.productId = productId;
+    this.userId = userId;
     this.price = price;
     this.quantity = quantity;
     this.matchedQuantity = matchedQuantity;
@@ -35,7 +39,6 @@ export default class Order {
     this.symbol = symbol;
     this.orderStatus = orderStatus;
     this.orderType = orderType;
-    this.userId = userId;
   }
 
   public getOppositeSide() {
@@ -69,7 +72,9 @@ export default class Order {
   static newFromPayload(payload: any) {
     return new Order(
       payload.orderId,
+      payload.createdAt,
       payload.productId,
+      payload.userId,
       payload.price,
       payload.quantity,
       payload.matchedQuantity,
@@ -77,7 +82,6 @@ export default class Order {
       payload.symbol,
       payload.orderStatus,
       payload.orderType,
-      payload.userId,
     );
   }
   toString() {

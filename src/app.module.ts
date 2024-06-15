@@ -13,10 +13,10 @@ import { KafkaModule } from './kafka/kafka.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    KafkaModule,
     OrderManagerModule,
     MatchEngineModule,
     MarketDataModule,
-    KafkaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
